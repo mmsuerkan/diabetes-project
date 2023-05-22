@@ -70,10 +70,10 @@ export default {
       tab: null,
       items: [
         { name: 'Upload Blood Sugar', route: '/Tab1Component', component: Tab1Component },
-        { name: 'Charts', route: '/Tab2Component', component: Tab2Component },
-        { name: 'Guide', route: '/Tab2Component', component: Tab2Component },
-        { name: 'Update Daily Diet', route: '/Tab2Component', component: Tab2Component },
-        { name: 'Profile', route: '/Tab2Component', component: Tab2Component },
+        { name: 'Charts', route: '/Tab1Component', component: Tab2Component },
+        { name: 'Guide', route: '/Tab1Component', component: Tab2Component },
+        { name: 'Update Daily Diet', route: '/Tab1Component', component: Tab2Component },
+        { name: 'Profile', route: '/Tab1Component', component: Tab2Component },
       ],
       // ...
     }
