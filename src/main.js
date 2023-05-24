@@ -6,7 +6,7 @@ import { registerLicense } from '@syncfusion/ej2-base'
 Vue.config.productionTip = false
 
 
-registerLicense("342e312e30dFt1fa9RzKRGAPOgedcb+95PDTwe0U5g0rLOj6Vz+kM=");
+registerLicense("342e312e30gRlrcldnNTefx7U5J4NIho7fOQOKLZfvRwKrdwrLjhc=");
 new Vue({
   router,
   vuetify,

@@ -7,6 +7,8 @@ import LoginPage from "@/components/LoginPage";
 import UploadBloodSugar from "@/components/UploadBloodSugar.vue";
 
 import ChartsComponent from "@/components/ChartsComponent.vue";
+import GuideComponent from "@/components/GuideComponent.vue";
+import ProfileComponent from "@/components/ProfileComponent.vue";
 
 
 Vue.use(VueRouter)
@@ -34,6 +36,17 @@ const routes = [
     name: 'ChartsComponent',
     component: ChartsComponent
   },
+  {
+    path: '/GuideComponent',
+    name: 'GuideComponent',
+    component: GuideComponent
+  },
+    {
+    path: '/ProfileComponent',
+    name: 'ProfileComponent',
+      component: ProfileComponent
+    }
+    
 
 
  

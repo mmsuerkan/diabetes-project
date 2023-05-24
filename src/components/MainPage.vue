@@ -61,19 +61,22 @@
 </template>
 
 <script>
-import Tab1Component from '@/components/UploadBloodSugar.vue';
-import Tab2Component from '@/components/ChartsComponent.vue';
+import UploadBloodSugar from '@/components/UploadBloodSugar.vue';
+import ChartsComponent from '@/components/ChartsComponent.vue';
+import GuideComponent from '@/components/GuideComponent.vue';
+import ProfileComponent from "@/components/ProfileComponent.vue";
+import UpdateDailyDiet from "@/components/UpdateDailyDiet.vue";
 
 export default {
   data () {
     return {
       tab: null,
       items: [
-        { name: 'Upload Blood Sugar', route: '/Tab1Component', component: Tab1Component },
-        { name: 'Charts', route: '/Tab1Component', component: Tab2Component },
-        { name: 'Guide', route: '/Tab1Component', component: Tab2Component },
-        { name: 'Update Daily Diet', route: '/Tab1Component', component: Tab2Component },
-        { name: 'Profile', route: '/Tab1Component', component: Tab2Component },
+        { name: 'Upload Blood Sugar', route: '/UploadBloodSugar', component: UploadBloodSugar },
+        { name: 'Graphs', route: '/ChartsComponent', component: ChartsComponent },
+        { name: 'Guide', route: '/GuideComponent', component: GuideComponent },
+        { name: 'Update Daily Diet', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
+        { name: 'Profile', route: '/ProfileComponent', component: ProfileComponent },
       ],
       // ...
     }
