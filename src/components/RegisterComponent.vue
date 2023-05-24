@@ -45,7 +45,7 @@
             depressed
             color="secondary"
             dark
-            type="submit"
+            type="button"
             @click="$router.push('/')"
         >
           Back
@@ -56,23 +56,21 @@
 </template>
 
 <script>
+
+
 export default {
   data() {
     return {
       email: '',
       password: '',
-      birthDate: null,
+      name: '',
       gender: '',
       show1: false,
       genderOptions: ['Male', 'Female', 'Other']
     };
   },
   methods: {
-    register() {
-      // Register işlemlerini burada gerçekleştirin
-      // Örneğin, Firebase'e bağlanma ve kayıt işlemlerini bu kısımda gerçekleştirin
-      // this.email, this.password, this.birthDate ve this.gender değerlerini kullanarak kayıt işlemlerini gerçekleştirin
-    }
+
   }
 };
 </script>

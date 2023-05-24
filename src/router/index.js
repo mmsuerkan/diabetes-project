@@ -48,7 +48,7 @@ const routes = [
         component: ProfileComponent
     },
   {
-    path: '/RegisterComponent.vue',
+    path: '/RegisterComponent',
     name: 'RegisterPage',
     component: RegisterComponent
   }
