@@ -9,53 +9,57 @@ import UploadBloodSugar from "@/components/UploadBloodSugar.vue";
 import ChartsComponent from "@/components/ChartsComponent.vue";
 import GuideComponent from "@/components/GuideComponent.vue";
 import ProfileComponent from "@/components/ProfileComponent.vue";
+import RegisterComponent from "@/components/RegisterComponent.vue";
 
 
 Vue.use(VueRouter)
 
 const routes = [
 
-  {
-    path: '/',
-    name: 'LoginPage',
-    component: LoginPage
-  },
-
-  {
-    path: '/MainPage',
-    name: 'MainPage',
-    component: MainPage
-  },
-  {
-    path: '/UploadBloodSugar',
-    name: 'UploadBloodSugar',
-    component: UploadBloodSugar
-  },
-  {
-    path: '/Tab2Component',
-    name: 'ChartsComponent',
-    component: ChartsComponent
-  },
-  {
-    path: '/GuideComponent',
-    name: 'GuideComponent',
-    component: GuideComponent
-  },
     {
-    path: '/ProfileComponent',
-    name: 'ProfileComponent',
-      component: ProfileComponent
-    }
-    
+        path: '/',
+        name: 'LoginPage',
+        component: LoginPage
+    },
+
+    {
+        path: '/MainPage',
+        name: 'MainPage',
+        component: MainPage
+    },
+    {
+        path: '/UploadBloodSugar',
+        name: 'UploadBloodSugar',
+        component: UploadBloodSugar
+    },
+    {
+        path: '/Tab2Component',
+        name: 'ChartsComponent',
+        component: ChartsComponent
+    },
+    {
+        path: '/GuideComponent',
+        name: 'GuideComponent',
+        component: GuideComponent
+    },
+    {
+        path: '/ProfileComponent',
+        name: 'ProfileComponent',
+        component: ProfileComponent
+    },
+  {
+    path: '/RegisterComponent.vue',
+    name: 'RegisterPage',
+    component: RegisterComponent
+  }
 
 
- 
 ]
 
 const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes
 })
 
 export default router

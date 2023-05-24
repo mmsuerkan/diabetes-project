@@ -32,6 +32,15 @@
         >
           Sign in
         </v-btn>
+        <!-- araya mesafe bırak-->
+
+        <v-btn
+            depressed
+            color="primary"
+            @click="register"
+        >
+          Register
+        </v-btn>
 
       </form>
     </v-card-text>
@@ -54,6 +63,11 @@ export default {
       e.preventDefault();
 
       this.$router.push({name: 'MainPage'});
+    },
+    async register(e) {
+      e.preventDefault();
+
+      this.$router.push({name: 'RegisterPage'});
     },
 
   },
