@@ -38,6 +38,7 @@
             color="secondary"
             dark
             type="submit"
+            @click="register"
         >
           Register
         </v-btn>
@@ -56,8 +57,10 @@
 </template>
 
 <script>
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { ref, set,getDatabase } from "firebase/database";
 
-
+import sweetAlert from "sweetalert";
 export default {
   data() {
     return {
@@ -70,7 +73,34 @@ export default {
     };
   },
   methods: {
+    register () {
+      const auth = getAuth();
 
+      const db = getDatabase();
+      createUserWithEmailAndPassword(auth, this.email, this.password)
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            // Write user data to realtime database
+            set(ref(db, 'users/' + user.uid), {
+              email: user.email,
+              // any other user info you want to save...
+            });
+
+            sweetAlert("Success!", "You have successfully registered!", "success")
+
+            console.log(user);
+            this.$router.push('/');
+            // ...
+          })
+          .catch((error) => {
+            sweetAlert("Error!", error.message, "error")
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.log(errorCode, errorMessage);
+            // ..
+          });
+    }
   }
 };
 </script>

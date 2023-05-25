@@ -47,6 +47,10 @@
 
 
 <script>
+
+import { getAuth } from "firebase/auth";
+import { ref, set ,push} from "firebase/database";
+import { getDatabase } from "firebase/database";
 export default {
   data: () => ({
     menu: false,
@@ -58,9 +62,26 @@ export default {
   methods: {
     submitForm() {
       if (this.$refs.form.validate()) {
-        // Form bilgilerini sunucuya gönderme işlemleri burada yapılır
-        console.log(this.form);
+        const auth = getAuth();
+        const user = auth.currentUser;
+        const db = getDatabase();
+
+        if (user) {
+          const newHealthDataRef = push(ref(db, 'users/' + user.uid + '/healthData'));
+          set(newHealthDataRef, {
+            bloodSugarLevel: this.form.bloodSugarLevel,
+            measurementTime: this.form.measurementTime
+          }).then(() => {
+            console.log("Health data saved successfully");
+          }).catch((error) => {
+            console.log("Error saving health data: ", error);
+          });
+        } else {
+          // Kullanıcı oturum açmamışsa, hata mesajı göster
+          console.log("No user is signed in");
+        }
       }
+
     },
   },
 };

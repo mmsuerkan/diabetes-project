@@ -47,8 +47,8 @@
   </v-card>
 </template>
 <script>
-
-
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import sweetAlert from "sweetalert";
 export default {
   components: {},
   data: () => ({
@@ -61,8 +61,22 @@ export default {
   methods: {
     async enter(e) {
       e.preventDefault();
+      const auth = getAuth();
 
-      this.$router.push({name: 'MainPage'});
+      signInWithEmailAndPassword(auth, this.email, this.password)
+          .then((userCredential) => {
+            // Signed in
+            const user = userCredential.user;
+            sweetAlert("Success", user.email + "You are logged in", "success");
+            this.$router.push({name: 'MainPage'});
+            // ...
+          })
+          .catch((error) => {
+
+            const errorMessage = error.message;
+            sweetAlert("Error", errorMessage, "error");
+          });
+
     },
     async register(e) {
       e.preventDefault();
