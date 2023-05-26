@@ -6,7 +6,7 @@
           <v-text-field
               v-model.number="form.bloodSugarLevel"
               :rules="[v => !!v || 'Bu alan gereklidir']"
-              label="Kan Şekeri Seviyesi"
+              label="Kan Şekeri Seviyesi (mg/dL)"
               required
           ></v-text-field>
         </v-col>
@@ -42,24 +42,31 @@
     </v-form>
 
     <v-btn color="primary" @click="submitForm">Submit</v-btn>
+    <BloodSugarTable />
   </v-container>
 </template>
 
 
 <script>
-
 import { getAuth } from "firebase/auth";
-import { ref, set ,push} from "firebase/database";
+import { ref, set, push } from "firebase/database";
 import { getDatabase } from "firebase/database";
 import sweetAlert from "sweetalert";
+import BloodSugarTable from '@/components/BloodSugarTable.vue';
+
 export default {
-  data: () => ({
-    menu: false,
-    form: {
-      bloodSugarLevel: null,
-      measurementTime: null,
-    },
-  }),
+  components: {
+    BloodSugarTable
+  },
+  data() {
+    return {
+      menu: false,
+      form: {
+        bloodSugarLevel: null,
+        measurementTime: null,
+      },
+    };
+  },
   methods: {
     submitForm() {
       if (this.$refs.form.validate()) {
@@ -68,6 +75,19 @@ export default {
         const db = getDatabase();
 
         if (user) {
+          // Kan şekeri değerini kontrol et
+          const bloodSugarLevel = parseInt(this.form.bloodSugarLevel);
+          if (isNaN(bloodSugarLevel) || bloodSugarLevel < 70 || bloodSugarLevel > 140) {
+            sweetAlert("Hata!", "Kan şekeri seviyesi geçerli değil. 70-140 arası değeri olmalıdır", "error");
+            return;
+          }
+
+          // Ölçüm saati değerini kontrol et
+          if (!this.form.measurementTime) {
+            sweetAlert("Hata!", "Ölçüm saati boş olamaz.", "error");
+            return;
+          }
+
           // Anlık tarih/saat bilgisi oluştur
           const now = new Date();
           const dateTimeString = now.toISOString();
@@ -77,12 +97,14 @@ export default {
             bloodSugarLevel: this.form.bloodSugarLevel,
             measurementTime: this.form.measurementTime,
             dateTime: dateTimeString // Tarih/saat bilgisini burada ekliyoruz
-          }).then(() => {
-            sweetAlert("Başarılı!", "Kan şekeri seviyesi başarıyla kaydedildi.", "success")
-            console.log("Health data saved successfully");
-          }).catch((error) => {
-            console.log("Error saving health data: ", error);
-          });
+          })
+              .then(() => {
+                sweetAlert("Başarılı!", "Kan şekeri seviyesi başarıyla kaydedildi.", "success");
+                console.log("Health data saved successfully");
+              })
+              .catch((error) => {
+                console.log("Error saving health data: ", error);
+              });
         } else {
           // Kullanıcı oturum açmamışsa, hata mesajı göster
           console.log("No user is signed in");
@@ -92,6 +114,7 @@ export default {
   },
 };
 </script>
+
 
 <style scoped>
 .blood-sugar-component {
