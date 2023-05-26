@@ -75,7 +75,7 @@ export default {
         { name: 'Upload Blood Sugar', route: '/UploadBloodSugar', component: UploadBloodSugar },
         { name: 'Graphs', route: '/ChartsComponent', component: ChartsComponent },
         { name: 'Guide', route: '/GuideComponent', component: GuideComponent },
-        { name: 'Update Daily Diet', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
+        { name: 'Daily Diet Lıst', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
         { name: 'Profile', route: '/ProfileComponent', component: ProfileComponent },
       ],
       // ...
