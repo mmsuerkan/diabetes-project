@@ -2,7 +2,7 @@
   <v-container class="blood-sugar-component">
     <v-form ref="form">
       <v-row>
-        <v-col cols="12">
+        <v-col>
           <v-text-field
               v-model.number="form.bloodSugarLevel"
               :rules="[v => !!v || 'Bu alan gereklidir']"
@@ -10,7 +10,7 @@
               required
           ></v-text-field>
         </v-col>
-        <v-col cols="12">
+        <v-col >
           <v-menu
               ref="menu"
               v-model="menu"
