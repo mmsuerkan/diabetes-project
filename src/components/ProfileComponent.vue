@@ -1,31 +1,51 @@
 <template>
-  <div>
-    <h1>User Profile</h1>
-    <v-card>
-      <v-card-title>
+  <div class="full-screen">
+    <v-card class="profile-card">
+      <div class="profile-header">
+        <img :src="profileImageUrl" alt="Profile Image" v-if="profileImageUrl" class="profile-image">
+        <label for="file-upload" class="file-upload-label">
+          <svg-icon type="mdi" :path="path"></svg-icon>
+        </label>
+        <input id="file-upload" type="file" @change="onFileChange" style="display:none;">
+        <v-btn class="upload-btn" @click="uploadImage">Upload</v-btn>
+      </div>
+      <v-card-title class="title">
         User Information
       </v-card-title>
-      <v-card-subtitle>
-        Please upload your profile picture
-      </v-card-subtitle>
-      <v-card-text>
-        <p>Your Email: {{ userEmail }}</p>
-        <p>Your Gender: {{ userGender }}</p>
-        <input type="file" @change="onFileChange">
-        <v-btn @click="uploadImage">Submit</v-btn>
-        <img :src="profileImageUrl" alt="Profile Image">
-      </v-card-text>
+      <div class="info-cards">
+        <v-card class="info-card">
+          <v-card-subtitle>Email</v-card-subtitle>
+          <v-card-text> <b>{{ userEmail }}</b></v-card-text>
+        </v-card>
+        <v-card class="info-card">
+          <v-card-subtitle>Gender</v-card-subtitle>
+          <v-card-text> <b>{{ userGender }} </b></v-card-text>
+        </v-card>
+      </div>
     </v-card>
   </div>
 </template>
 
+
 <script>
-import firebase from 'firebase/app';
-import 'firebase/storage';
-import {getDatabase, onValue, ref} from "firebase/database";
+import {
+  getStorage, ref as ref_storage,
+  getDownloadURL, uploadBytesResumable
+} from "firebase/storage";
+
+import SvgIcon from '@jamescoyle/vue-icon'
+import { mdiAccount } from '@mdi/js'
+
+import {
+  getDatabase, onValue, ref as ref_database, set
+} from "firebase/database";
 import { getAuth } from "firebase/auth";
+import swal from "sweetalert";
 
 export default {
+  components: {
+    SvgIcon
+  },
   name: "ProfileComponent",
   data() {
     return {
@@ -33,53 +53,145 @@ export default {
       profileImageUrl: '',
       userEmail: '',
       userGender: '',
+      isUploading: false,
+      uploadProgress: 0,
+      path: mdiAccount,
     };
   },
-  created() {
-    const user = getAuth().currentUser;
-    const db = getDatabase();
-
-      console.log("user: " + user);
-    const userRef = ref(db, 'users/' + user.uid);
-    onValue(userRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log("data: " + data);
-      if (data) {
-         this.userEmail = data.email;
-         this.userGender = data.gender;
-      }
-    });
-
+  async created() {
+    await this.fetchProfileData();
   },
   methods: {
+    async fetchProfileData() {
+      const user = getAuth().currentUser;
+      const db = getDatabase();
+      const userRef = ref_database(db, 'users/' + user.uid);
+
+      onValue(userRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          this.userEmail = data.email;
+          this.userGender = data.gender;
+          if (data.profileImageUrl) {
+            this.profileImageUrl = data.profileImageUrl;
+          }
+        }
+      });
+    },
     onFileChange(e) {
       this.selectedFile = e.target.files[0];
     },
-    uploadImage() {
+    async uploadImage() {
       if (!this.selectedFile) {
         alert('Please select an image!');
         return;
       }
 
-      const storageRef = firebase.storage().ref();
-      const uploadTask = storageRef.child('images/' + this.selectedFile.name).put(this.selectedFile);
+      this.isUploading = true;
+      const user = getAuth().currentUser;
+      const storage = getStorage();
+      const storageRef = ref_storage(storage, `users/${user.uid}/${this.selectedFile.name}`);
+      const uploadTask = uploadBytesResumable(storageRef, this.selectedFile);
 
-      uploadTask.on('state_changed',
-          snapshot => {
-            // Compute the upload progress as a percentage and store it
+      uploadTask.on(
+          "state_changed",
+          (snapshot) => {
             const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log('Upload is ' + progress + '% done');
+            console.log("Upload is " + progress + "% done");
+            this.uploadProgress = progress;
           },
-          error => {
-            console.log(error);
+          async (error) => {
+            console.log("Error uploading image:", error);
+            this.isUploading = false;
+            this.uploadProgress = 0;
           },
-          () => {
-            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              this.profileImageUrl = downloadURL;
-            });
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              console.log("Image uploaded successfully. Download URL:", downloadURL);
+
+              if (this.profileImageUrl !== downloadURL) {
+                this.profileImageUrl = downloadURL;
+                const db = getDatabase();
+                const userRef = ref_database(db, `users/${user.uid}`);
+                set(userRef, {
+                  email: this.userEmail,
+                  gender: this.userGender,
+                  profileImageUrl: downloadURL,
+                });
+                await swal("Success!", "Your profile picture has been updated!", "success");
+              } else {
+                await swal("Warning!", "This image has already been uploaded!", "warning");
+              }
+
+              this.isUploading = false;
+              this.uploadProgress = 0;
+              this.$forceUpdate();
+            } catch (error) {
+              console.log("Error getting download URL:", error);
+            }
           }
       );
     },
   },
 };
 </script>
+<style scoped>
+.full-screen {
+  margin-bottom: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f2f2f2;
+}
+.profile-card {
+  width: 70%;
+  font-size: 1.2em;
+}
+.profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.profile-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #3f51b5;
+}
+.file-upload-label {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px;
+  background-color: #3f51b5;
+  color: white;
+  cursor: pointer;
+}
+.file-upload-label:hover {
+  background-color: #303f9f;
+}
+.upload-btn {
+  margin-top: 15px;
+}
+.title {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #3f51b5;
+}
+.info-cards {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+}
+.info-card {
+  width: 40%;
+  margin: 10px;
+}
+.info-card > v-card-subtitle {
+  font-weight: bold;
+}
+</style>

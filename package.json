@@ -8,6 +8,8 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@jamescoyle/vue-icon": "^0.1.2",
+    "@mdi/js": "^7.2.96",
     "@syncfusion/ej2-vue-charts": "^21.2.5",
     "axios": "^0.27.2",
     "core-js": "^3.8.3",
