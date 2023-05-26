@@ -51,6 +51,7 @@
 import { getAuth } from "firebase/auth";
 import { ref, set ,push} from "firebase/database";
 import { getDatabase } from "firebase/database";
+import sweetAlert from "sweetalert";
 export default {
   data: () => ({
     menu: false,
@@ -72,6 +73,7 @@ export default {
             bloodSugarLevel: this.form.bloodSugarLevel,
             measurementTime: this.form.measurementTime
           }).then(() => {
+            sweetAlert("Başarılı!", "Kan şekeri seviyesi başarıyla kaydedildi.", "success")
             console.log("Health data saved successfully");
           }).catch((error) => {
             console.log("Error saving health data: ", error);
