@@ -68,10 +68,15 @@ export default {
         const db = getDatabase();
 
         if (user) {
+          // Anlık tarih/saat bilgisi oluştur
+          const now = new Date();
+          const dateTimeString = now.toISOString();
+
           const newHealthDataRef = push(ref(db, 'users/' + user.uid + '/healthData'));
           set(newHealthDataRef, {
             bloodSugarLevel: this.form.bloodSugarLevel,
-            measurementTime: this.form.measurementTime
+            measurementTime: this.form.measurementTime,
+            dateTime: dateTimeString // Tarih/saat bilgisini burada ekliyoruz
           }).then(() => {
             sweetAlert("Başarılı!", "Kan şekeri seviyesi başarıyla kaydedildi.", "success")
             console.log("Health data saved successfully");
@@ -83,7 +88,6 @@ export default {
           console.log("No user is signed in");
         }
       }
-
     },
   },
 };
