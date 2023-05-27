@@ -38,17 +38,19 @@
             md="4"
             lg="3"
         >
-          <daily-diet-list-component :meals="dietList"></daily-diet-list-component>
+          <daily-diet-list-component
+              :meals="dietList"
+              @delete-diet="deleteDiet(index)"
+          ></daily-diet-list-component>
         </v-col>
       </v-row>
     </v-container>
   </div>
 </template>
-
 <script>
 import DailyDietListComponent from "@/components/DailyDietListComponent.vue";
 import { getAuth } from "firebase/auth";
-import { ref, onValue, set, push } from "firebase/database";
+import { ref, onValue, set, push,remove  } from "firebase/database";
 import { getDatabase } from "firebase/database";
 
 export default {
@@ -128,7 +130,26 @@ export default {
         });
       });
     },
+    deleteDiet(index) {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      const db = getDatabase();
 
+      if (user) {
+        const dietList = this.userDietLists[index];
+        const dietListKey = Object.keys(dietList)[0]; // Assuming each diet list has only one key
+        const dietListRef = ref(db, `users/${user.uid}/diet/${dietListKey}`);
+        remove(dietListRef)
+            .then(() => {
+              console.log("Diet list deleted successfully");
+            })
+            .catch((error) => {
+              console.error("Error deleting diet list:", error);
+            });
+      } else {
+        console.log("No user is signed in");
+      }
+    },
     saveDailyDiet() {
       const auth = getAuth();
       const user = auth.currentUser;
