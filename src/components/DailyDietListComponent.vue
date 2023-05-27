@@ -1,14 +1,20 @@
 <template>
   <div>
-    <h2>Daily Diet List - {{ getCurrentDate() }} - Total Calories - {{ totalCalories}}</h2>
+    <h2>Daily Diet List - {{ getCurrentDate() }} - Total Calories - {{ totalCalories }}</h2>
     <v-expansion-panels>
       <v-expansion-panel v-for="meal in meals" :key="meal.id">
         <v-expansion-panel-header>
           {{ meal.name }} - {{ meal.calories }} calories
         </v-expansion-panel-header>
         <v-expansion-panel-content>
-          <p>Meal details go here</p>
-          <!-- You can add the components needed to display meal details here -->
+          <div class="meal-details">
+            <div class="meal-image">
+              <img :src="getMealImage(meal.name.replace(/ /g, '-'))" alt="meal image" />
+            </div>
+            <div class="meal-info">
+              <p>{{ meal.details }}</p>
+            </div>
+          </div>
         </v-expansion-panel-content>
       </v-expansion-panel>
     </v-expansion-panels>
@@ -25,15 +31,41 @@ export default {
     },
   },
   methods: {
+    getMealImage(mealId) {
+      return require(`@/assets/meal-images/${mealId}.jpg`);
+    },
     getCurrentDate() {
       const date = new Date();
       return date.toLocaleDateString();
     },
   },
-  computed:{
+  computed: {
     totalCalories() {
       return this.meals.reduce((total, meal) => total + meal.calories, 0);
-    }
-  }
+    },
+  },
 };
 </script>
+
+<style scoped>
+.meal-details {
+  display: flex;
+  align-items: center;
+}
+
+.meal-image {
+  width: 100px;
+  height: 100px;
+  margin-right: 16px;
+}
+
+.meal-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.meal-info {
+  flex: 1;
+}
+</style>
