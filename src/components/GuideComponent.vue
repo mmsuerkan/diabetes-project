@@ -15,7 +15,7 @@
           <li>Kan şekerinizi ve ölçüm saatini girin ve "Gönder" butonuna tıklayın.</li>
           <li>Verileriniz başarıyla kaydedildiğinde, bir onay mesajı görünecektir.</li>
           <li>Verilerinizi tablo şeklinde görmek için "Sağlık Verileri" sayfasına gidin. Bu tablo, verilerinizi ölçüm saatine göre sıralar.</li>
-          <li>Hesap ayarlarınızı değiştirmek veya çıkış yapmak için "Hesap" sayfasını ziyaret edin.</li>
+          <li>Hesap ayarlarınızı değiştirmek veya çıkış yapmak için "Guide" sayfasını ziyaret edin.</li>
         </ol>
       </v-card-text>
 
