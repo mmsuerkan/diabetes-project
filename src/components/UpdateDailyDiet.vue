@@ -28,7 +28,21 @@
         <v-btn color="primary" @click="saveDailyDiet">Save</v-btn>
       </v-card-actions>
     </v-card>
-    <daily-diet-list-component :meals="selectedMealsData"></daily-diet-list-component>
+
+    <v-container fluid>
+      <v-row>
+        <v-col
+            v-for="(dietList, index) in userDietLists"
+            :key="index"
+            cols="12"
+            sm="6"
+            md="4"
+            lg="3"
+        >
+          <daily-diet-list-component :meals="dietList"></daily-diet-list-component>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
@@ -56,12 +70,21 @@ export default {
       const db = getDatabase();
 
       if (user) {
-        const userRef = ref(db, 'users/' + user.uid + '/diet/');
-        onValue(userRef, (snapshot) => {
+        const userDietRef = ref(db, 'users/' + user.uid + '/diet/');
+        onValue(userDietRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {
-            const mealIds = Object.values(data).map(meal => meal.id);
-            this.selectedMeals = mealIds;
+            // Convert the data object into an array
+            let formattedData = Object.keys(data).map(key => {
+              let dietList = data[key];
+              // Each diet list is an object where the keys are timestamps
+              // and the values are arrays of meals. We need to convert
+              // this into an array of arrays of meals.
+              return Object.keys(dietList).map(timeStamp => dietList[timeStamp]);
+            });
+            this.userDietLists = formattedData;
+            // Save the data to localStorage
+            localStorage.setItem('userDietLists', JSON.stringify(formattedData));
           }
         });
       } else {
@@ -94,21 +117,26 @@ export default {
       });
     },
     fetchMealData() {
-      const db = getDatabase();
-      const mealRef = ref(db, 'meals/');
-      onValue(mealRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-          let formattedData = Object.keys(data).map(key => {
-            return {
-              id: key,
-              name: data[key].name,
-              calories: data[key].calories,
-              isSelected: false,
-            };
-          });
-          this.mealList = formattedData;
-        }
+      return new Promise((resolve, reject) => {
+        const db = getDatabase();
+        const mealRef = ref(db, 'meals/');
+        onValue(mealRef, (snapshot) => {
+          const data = snapshot.val();
+          if (data) {
+            let formattedData = Object.keys(data).map(key => {
+              return {
+                id: key,
+                name: data[key].name,
+                calories: data[key].calories,
+                isSelected: false,
+              };
+            });
+            this.mealList = formattedData;
+            resolve();
+          } else {
+            reject(new Error('No meals found'));
+          }
+        });
       });
     },
     saveDailyDiet() {
