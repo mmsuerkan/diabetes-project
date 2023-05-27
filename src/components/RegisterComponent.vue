@@ -84,6 +84,8 @@ export default {
             // Write user data to realtime database
             set(ref(db, 'users/' + user.uid), {
               email: user.email,
+              gender:this.gender,
+              photoURL: user.photoURL,
               // any other user info you want to save...
             });
 
