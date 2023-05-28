@@ -21,6 +21,14 @@
           <v-card-subtitle>Gender</v-card-subtitle>
           <v-card-text> <b>{{ userGender }} </b></v-card-text>
         </v-card>
+        <v-card class="info-card">
+          <v-card-subtitle>Age</v-card-subtitle>
+          <v-card-text> <b>{{ userAge }} years</b></v-card-text>
+        </v-card>
+        <v-card class="info-card">
+          <v-card-subtitle>BMI and Diabetes Risk</v-card-subtitle>
+          <v-card-text> <b :style="{ color: diabetesRisk.color }">{{ bmi }} kg/m² - {{ diabetesRisk.level }}</b></v-card-text>
+        </v-card>
       </div>
     </v-card>
   </div>
@@ -56,20 +64,49 @@ export default {
       isUploading: false,
       uploadProgress: 0,
       path: mdiAccount,
+      userAge: '',
+      userWeight: '',
+      userHeight: '',
+      bmi: '',
+      diabetesRisk: {
+        level: '',
+        color: ''
+      },
+
     };
   },
   async created() {
     await this.fetchProfileData();
+
   },
   methods: {
+    calculateBMI() {
+      const heightInMeters = this.userHeight / 100;
+      this.bmi = (this.userWeight / (heightInMeters * heightInMeters)).toFixed(2);
+
+      if (this.bmi >= 30) {
+        this.diabetesRisk.level = 'High Risk';
+        this.diabetesRisk.color = 'red';
+      } else if (this.bmi >= 25) {
+        this.diabetesRisk.level = 'Increased Risk';
+        this.diabetesRisk.color = 'orange';
+      } else {
+        this.diabetesRisk.level = 'Normal Risk';
+        this.diabetesRisk.color = 'green';
+      }
+    },
     async fetchProfileData() {
       const user = getAuth().currentUser;
       const db = getDatabase();
       const userRef = ref_database(db, 'users/' + user.uid);
 
-      onValue(userRef, (snapshot) => {
+      await onValue(userRef, (snapshot) => {
         const data = snapshot.val();
         if (data) {
+          this.userAge = data.age;
+          this.userWeight = data.weight;
+          this.userHeight = data.height;
+          this.calculateBMI();
           this.userEmail = data.email;
           this.userGender = data.gender;
           if (data.profileImageUrl) {
@@ -118,6 +155,9 @@ export default {
                   email: this.userEmail,
                   gender: this.userGender,
                   profileImageUrl: downloadURL,
+                  age: this.userAge,
+                  weight: this.userWeight,
+                  height: this.userHeight
                 });
                 await swal("Success!", "Your profile picture has been updated!", "success");
               } else {

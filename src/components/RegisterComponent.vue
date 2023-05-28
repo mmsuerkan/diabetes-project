@@ -33,6 +33,24 @@
               label="Full Name"
               required
           ></v-text-field>
+          <v-text-field
+              v-model="age"
+              label="Age"
+              type="number"
+              required
+          ></v-text-field>
+          <v-text-field
+              v-model="weight"
+              label="Weight in kg"
+              type="number"
+              required
+          ></v-text-field>
+          <v-text-field
+              v-model="height"
+              label="Height in cm"
+              type="number"
+              required
+          ></v-text-field>
           <v-select
               v-model="gender"
               :items="genderOptions"
@@ -63,6 +81,9 @@ export default {
     name: '',
     gender: '',
     genderOptions: ['Male', 'Female', 'Other'],
+    age: '',
+    weight: '',
+    height: '',
     emailRules: [
       v => !!v || 'E-mail is required',
       v => /.+@.+/.test(v) || 'E-mail must be valid',
@@ -96,6 +117,9 @@ export default {
           email: user.email,
           gender:this.gender,
           name: this.name,
+          age: this.age,
+          weight: this.weight,
+          height: this.height,
           // any other user info you want to save...
         });
         await sendEmailVerification(user)
