@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1> Daily Diet List </h1>
+    <h1>Daily Diet List</h1>
     <v-card>
       <v-card-title>
         Select Meals
@@ -24,6 +24,11 @@
         </v-select>
       </v-card-text>
       <v-card-actions>
+        <v-date-picker
+            v-model="selectedDate"
+            label="Select Date"
+            dense
+        ></v-date-picker>
         <v-btn color="primary" @click="saveDailyDiet">Save</v-btn>
       </v-card-actions>
     </v-card>
@@ -38,10 +43,23 @@
             md="4"
             lg="3"
         >
-          <daily-diet-list-component
-              :meals="dietList"
-              @delete-diet="deleteDiet(index)"
-          ></daily-diet-list-component>
+          <v-accordion>
+            <v-accordion-item>
+              <v-accordion-item-header>
+                <template v-slot:default>
+                  <h4 class="diet-date">{{ dietList.date }}</h4>
+                  <span class="diet-calories">Total Calories - {{ getTotalCalories(dietList.meals) }} cal</span>
+                </template>
+              </v-accordion-item-header>
+              <v-accordion-item-content>
+                <daily-diet-list-component
+                    :meals="dietList.meals"
+                    :date="dietList.date"
+                    @delete-diet="deleteDiet(index)"
+                ></daily-diet-list-component>
+              </v-accordion-item-content>
+            </v-accordion-item>
+          </v-accordion>
         </v-col>
       </v-row>
       <div v-else class="no-diet-message">
@@ -54,8 +72,8 @@
 <script>
 import DailyDietListComponent from "@/components/DailyDietListComponent.vue";
 import { getAuth } from "firebase/auth";
-import { ref, onValue, set, remove } from "firebase/database";
-import { getDatabase } from "firebase/database";
+import { ref, onValue, set, remove, getDatabase, push } from "firebase/database";
+import swal from "sweetalert";
 
 export default {
   name: "UpdateDailyDiet",
@@ -65,6 +83,7 @@ export default {
       mealList: [],
       selectedMeals: [],
       userDietLists: [],
+      selectedDate: null,
     };
   },
   methods: {
@@ -78,7 +97,11 @@ export default {
         onValue(userDietRef, (snapshot) => {
           const data = snapshot.val();
           if (data) {
-            const dietLists = Object.values(data);
+            const dietLists = Object.entries(data).map(([id, dietList]) => ({
+              id,
+              date: dietList.date,
+              meals: dietList.meals,
+            }));
             this.userDietLists = dietLists;
             localStorage.setItem('userDietLists', JSON.stringify(dietLists));
           } else {
@@ -117,7 +140,7 @@ export default {
 
       if (user) {
         const dietList = this.userDietLists[index];
-        const dietListKey = Object.keys(dietList)[0]; // Assuming each diet list has only one key
+        const dietListKey = dietList.id;
         const dietListRef = ref(db, `users/${user.uid}/diet/${dietListKey}`);
         remove(dietListRef)
             .then(() => {
@@ -136,36 +159,53 @@ export default {
       const db = getDatabase();
 
       if (user) {
-        const timestamp = Date.now();
-        const date = new Date(timestamp);
-        const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-        const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+        if (this.selectedMeals.length === 0) {
+          swal("Please select at least one meal");
+          return;
+        }
 
-        const dietListRef = ref(db, `users/${user.uid}/diet/${formattedDate}_${time}`);
-        const meals = this.selectedMealsData.map(meal => ({
+        const selectedDate = this.selectedDate
+            ? this.formatDate(this.selectedDate)
+            : new Date().toLocaleDateString();
+        const dietListRef = ref(db, `users/${user.uid}/diet/`);
+        const newDietListRef = push(dietListRef);
+        const meals = this.selectedMealsData.map((meal) => ({
           id: meal.id,
           name: meal.name,
           calories: meal.calories,
           details: meal.details,
         }));
-        set(dietListRef, meals);
+        set(newDietListRef, {
+          date: selectedDate,
+          meals,
+        })
+            .then(() => {
+              console.log("Diet list saved successfully");
+              this.selectedMeals = [];
+              this.selectedDate = null;
+            })
+            .catch((error) => {
+              console.error("Error saving diet list:", error);
+            });
       } else {
         console.log("No user is signed in");
       }
     },
+    formatDate(date) {
+      const formattedDate = new Date(date);
+      return `${formattedDate.getDate()}-${formattedDate.getMonth() + 1}-${formattedDate.getFullYear()}`;
+    },
+    getTotalCalories(meals) {
+      return meals.reduce((total, meal) => total + meal.calories, 0);
+    },
   },
-
   computed: {
     selectedMealsData() {
       return this.selectedMeals.map(mealId => {
         return this.mealList.find(meal => meal.id === mealId);
       });
     },
-    totalCalories() {
-      return this.selectedMealsData.reduce((total, meal) => total + meal.calories, 0);
-    },
   },
-
   mounted() {
     this.fetchMealData().then(() => {
       this.fetchUserDiet();
@@ -179,5 +219,15 @@ export default {
   text-align: center;
   margin-top: 16px;
   font-weight: bold;
+}
+
+.diet-date {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.diet-calories {
+  font-size: 14px;
+  color: #757575;
 }
 </style>

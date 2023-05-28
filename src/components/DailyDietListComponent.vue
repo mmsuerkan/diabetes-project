@@ -1,18 +1,20 @@
 <template>
   <v-card>
     <v-card-title>
-      <h4>Daily Diet List - {{ getCurrentDate() }} <v-spacer></v-spacer>
-        Total Calories - {{ totalCalories }} cal</h4>
+      <h4 class="title">Daily Diet List - {{ formattedDate }}
+        <v-spacer></v-spacer>
+        Total Calories - {{ totalCalories }} cal
+      </h4>
     </v-card-title>
-    <v-card-actions>
-
-    </v-card-actions>
     <v-card-text>
       <template v-if="meals.length > 0">
         <v-expansion-panels>
           <v-expansion-panel v-for="meal in meals" :key="meal.id">
             <v-expansion-panel-header>
-              {{ meal.name }} - {{ meal.calories }} calories
+              <div class="header-content">
+                <div class="meal-name">{{ meal.name }}</div>
+                <div class="meal-calories">{{ meal.calories }} calories</div>
+              </div>
             </v-expansion-panel-header>
             <v-expansion-panel-content>
               <div class="meal-details">
@@ -33,6 +35,12 @@
         </div>
       </template>
     </v-card-text>
+    <v-card-actions>
+      <v-btn color="error" text @click="$emit('delete-diet')">
+        <v-icon left>mdi-delete</v-icon>
+        Delete
+      </v-btn>
+    </v-card-actions>
   </v-card>
 </template>
 
@@ -44,17 +52,27 @@ export default {
       type: Array,
       required: true,
     },
+    date: {
+      type: String,
+      required: true,
+    },
   },
   methods: {
     getMealImage(mealId) {
       return require(`@/assets/meal-images/${mealId}.jpg`);
     },
-    getCurrentDate() {
-      const date = new Date();
-      return date.toLocaleDateString();
+    formatDate(date) {
+      const parts = date.split("-");
+      const day = parts[0];
+      const month = parts[1];
+      const year = parts[2];
+      return `${day}-${month}-${year}`;
     },
   },
   computed: {
+    formattedDate() {
+      return this.formatDate(this.date);
+    },
     totalCalories() {
       return this.meals.reduce((total, meal) => total + meal.calories, 0);
     },
@@ -63,6 +81,24 @@ export default {
 </script>
 
 <style scoped>
+.title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.meal-name {
+  flex: 1;
+}
+
+.meal-calories {
+  margin-left: 16px;
+}
+
 .meal-details {
   display: flex;
   align-items: center;
