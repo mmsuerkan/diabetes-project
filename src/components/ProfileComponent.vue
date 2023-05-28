@@ -2,7 +2,7 @@
   <div class="full-screen">
     <v-card class="profile-card">
       <div class="profile-header">
-        <img :src="profileImageUrl" alt="Profile Image" v-if="profileImageUrl" class="profile-image">
+        <img :src="previewImageUrl" alt="Profile Image" v-if="previewImageUrl" class="profile-image">
         <label for="file-upload" class="file-upload-label">
           <svg-icon type="mdi" :path="path"></svg-icon>
         </label>
@@ -37,15 +37,20 @@
 
 <script>
 import {
-  getStorage, ref as ref_storage,
-  getDownloadURL, uploadBytesResumable
+  getStorage,
+  ref as ref_storage,
+  getDownloadURL,
+  uploadBytesResumable
 } from "firebase/storage";
 
 import SvgIcon from '@jamescoyle/vue-icon'
 import { mdiAccount } from '@mdi/js'
 
 import {
-  getDatabase, onValue, ref as ref_database, set
+  getDatabase,
+  onValue,
+  ref as ref_database,
+  set
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import swal from "sweetalert";
@@ -72,14 +77,33 @@ export default {
         level: '',
         color: ''
       },
-
+      previewImageUrl: '',
     };
   },
   async created() {
-    await this.fetchProfileData();
+    this.profileImageUrl = localStorage.getItem('profileImageUrl');
+    this.previewImageUrl = this.profileImageUrl;
 
+    if (this.profileImageUrl) {
+      const image = new Image();
+      image.src = this.profileImageUrl;
+      image.onload = () => {
+        this.previewImageUrl = this.profileImageUrl;
+      };
+    }
+
+    await this.fetchProfileData();
   },
   methods: {
+    previewImage() {
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        this.previewImageUrl = e.target.result;
+      };
+
+      reader.readAsDataURL(this.selectedFile);
+    },
     calculateBMI() {
       const heightInMeters = this.userHeight / 100;
       this.bmi = (this.userWeight / (heightInMeters * heightInMeters)).toFixed(2);
@@ -117,6 +141,7 @@ export default {
     },
     onFileChange(e) {
       this.selectedFile = e.target.files[0];
+      this.previewImage();
     },
     async uploadImage() {
       if (!this.selectedFile) {
@@ -149,6 +174,7 @@ export default {
 
               if (this.profileImageUrl !== downloadURL) {
                 this.profileImageUrl = downloadURL;
+                localStorage.setItem('profileImageUrl', downloadURL);
                 const db = getDatabase();
                 const userRef = ref_database(db, `users/${user.uid}`);
                 set(userRef, {

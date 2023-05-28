@@ -29,7 +29,7 @@
     </v-card>
 
     <v-container fluid>
-      <v-row>
+      <v-row v-if="userDietLists.length > 0">
         <v-col
             v-for="(dietList, index) in userDietLists"
             :key="index"
@@ -44,13 +44,17 @@
           ></daily-diet-list-component>
         </v-col>
       </v-row>
+      <div v-else class="no-diet-message">
+        <p>No diet lists available.</p>
+      </div>
     </v-container>
   </div>
 </template>
+
 <script>
 import DailyDietListComponent from "@/components/DailyDietListComponent.vue";
 import { getAuth } from "firebase/auth";
-import { ref, onValue, set, remove  } from "firebase/database";
+import { ref, onValue, set, remove } from "firebase/database";
 import { getDatabase } from "firebase/database";
 
 export default {
@@ -77,40 +81,14 @@ export default {
             const dietLists = Object.values(data);
             this.userDietLists = dietLists;
             localStorage.setItem('userDietLists', JSON.stringify(dietLists));
+          } else {
+            this.userDietLists = [];
           }
         });
       } else {
         console.log("No user is signed in");
       }
     },
-    /*
-        uploadInitialMealData() {
-          const db = getDatabase();
-
-          const initialMeals = [
-            { id: 1, name: "Oatmeal with Berries", calories: 150, details: "A healthy breakfast option made with oats and topped with fresh berries.", imageUrl: "https://d2t88cihvgacbj.cloudfront.net/manage/wp-content/uploads/2016/02/Triple-Berry-Oatmeal-Breakfast-Bowl-3.jpg?x96187" },
-            { id: 2, name: "Grilled Chicken Salad", calories: 300, details: "A delicious salad made with grilled chicken, mixed greens, and a variety of vegetables.", imageUrl: "https://example.com/image1.jpg" },
-            { id: 3, name: "Salmon with Roasted Vegetables", calories: 400, details: "Baked salmon served with a side of roasted vegetables, seasoned with herbs and spices.", imageUrl: "https://example.com/image2.jpg" },
-            { id: 4, name: "Greek Yogurt with Nuts", calories: 200, details: "Creamy Greek yogurt topped with a mix of nuts for added crunch and protein.", imageUrl: "https://example.com/image3.jpg" },
-            { id: 5, name: "Quinoa Salad with Avocado", calories: 250, details: "A refreshing salad made with quinoa, avocado, cherry tomatoes, and a light lemon dressing.", imageUrl: "https://example.com/image4.jpg" },
-            { id: 6, name: "Steamed Broccoli with Tofu", calories: 180, details: "Steamed broccoli served with tofu cubes and a drizzle of soy sauce.", imageUrl: "https://example.com/image5.jpg" },
-            { id: 7, name: "Whole Wheat Pasta with Tomato Sauce", calories: 350, details: "Whole wheat pasta tossed in a flavorful tomato sauce, topped with grated Parmesan cheese.", imageUrl: "https://example.com/image6.jpg" },
-            { id: 8, name: "Spinach and Mushroom Omelette", calories: 200, details: "A classic omelette made with fresh spinach, mushrooms, and melted cheese.", imageUrl: "https://example.com/image7.jpg" },
-            { id: 9, name: "Turkey Wrap with Vegetables", calories: 300, details: "A light and nutritious wrap filled with sliced turkey, crisp vegetables, and a touch of hummus.", imageUrl: "https://example.com/image8.jpg" },
-            { id: 10, name: "Baked Sweet Potato with Grilled Chicken", calories: 400, details: "A satisfying meal of baked sweet potato topped with seasoned grilled chicken and a side of steamed vegetables.", imageUrl: "https://example.com/image9.jpg" },
-          ];
-          initialMeals.forEach(meal => {
-            const mealRef = push(ref(db, "meals"));
-            set(mealRef, {
-              name: meal.name,
-              calories: meal.calories,
-              details: meal.details,
-            });
-          });
-        },
-
-     */
-
     fetchMealData() {
       return new Promise((resolve, reject) => {
         const db = getDatabase();
@@ -189,10 +167,17 @@ export default {
   },
 
   mounted() {
-
     this.fetchMealData().then(() => {
       this.fetchUserDiet();
     });
   },
 };
 </script>
+
+<style>
+.no-diet-message {
+  text-align: center;
+  margin-top: 16px;
+  font-weight: bold;
+}
+</style>

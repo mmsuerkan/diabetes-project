@@ -8,26 +8,34 @@
 
     </v-card-actions>
     <v-card-text>
-      <v-expansion-panels>
-        <v-expansion-panel v-for="meal in meals" :key="meal.id">
-          <v-expansion-panel-header>
-            {{ meal.name }} - {{ meal.calories }} calories
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <div class="meal-details">
-              <div class="meal-image">
-                <img :src="getMealImage(meal.name.replace(/ /g, '-'))" alt="meal image" />
+      <template v-if="meals.length > 0">
+        <v-expansion-panels>
+          <v-expansion-panel v-for="meal in meals" :key="meal.id">
+            <v-expansion-panel-header>
+              {{ meal.name }} - {{ meal.calories }} calories
+            </v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <div class="meal-details">
+                <div class="meal-image">
+                  <img :src="getMealImage(meal.name.replace(/ /g, '-'))" alt="meal image" />
+                </div>
+                <div class="meal-info">
+                  <p>{{ meal.details }}</p>
+                </div>
               </div>
-              <div class="meal-info">
-                <p>{{ meal.details }}</p>
-              </div>
-            </div>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </template>
+      <template v-else>
+        <div class="no-meals-message">
+          <p>No diet list available.</p>
+        </div>
+      </template>
     </v-card-text>
   </v-card>
 </template>
+
 <script>
 export default {
   name: "DailyDietListComponent",
@@ -74,5 +82,11 @@ export default {
 
 .meal-info {
   flex: 1;
+}
+
+.no-meals-message {
+  text-align: center;
+  margin-top: 16px;
+  font-weight: bold;
 }
 </style>
