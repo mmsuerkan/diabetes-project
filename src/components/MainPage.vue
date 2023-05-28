@@ -66,26 +66,40 @@ import ChartsComponent from '@/components/ChartsComponent.vue';
 import GuideComponent from '@/components/GuideComponent.vue';
 import ProfileComponent from "@/components/ProfileComponent.vue";
 import UpdateDailyDiet from "@/components/UpdateDailyDiet.vue";
+import { getAuth } from "firebase/auth";
 
 export default {
-  data () {
+  data() {
     return {
       tab: null,
       items: [
         { name: 'Upload Blood Sugar', route: '/UploadBloodSugar', component: UploadBloodSugar },
         { name: 'Graphs', route: '/ChartsComponent', component: ChartsComponent },
         { name: 'Guide', route: '/GuideComponent', component: GuideComponent },
-        { name: 'Daily Diet Lıst', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
+        { name: 'Daily Diet List', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
         { name: 'Profile', route: '/ProfileComponent', component: ProfileComponent },
       ],
-      // ...
+    };
+  },
+  created() {
+    const auth = getAuth();
+    if (!auth.currentUser) {
+      this.$router.push({ name: "LoginPage" });
     }
   },
   methods: {
     logout() {
-      this.$router.push({name: 'LoginPage'});
-    }
+      const auth = getAuth();
+      auth.signOut()
+          .then(() => {
+            // Kullanıcı başarıyla logout oldu
+            this.$router.push({ name: "LoginPage" });
+          })
+          .catch((error) => {
+            // Logout işlemi sırasında bir hata oluştu
+            console.error("Logout error:", error);
+          });
+    },
   },
-  // ...
-}
+};
 </script>

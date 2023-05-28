@@ -55,6 +55,12 @@ export default {
       (v) => !!v || "Password is required",
     ],
   }),
+  created() {
+    const auth = getAuth();
+    if (auth.currentUser) {
+      this.$router.push({ name: "MainPage" });
+    }
+  },
   methods: {
     goToForgotPasswordPage() {
       this.$router.push({ name: "ForgotPassword" });
