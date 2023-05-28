@@ -10,6 +10,7 @@ import ChartsComponent from "@/components/ChartsComponent.vue";
 import GuideComponent from "@/components/GuideComponent.vue";
 import ProfileComponent from "@/components/ProfileComponent.vue";
 import RegisterComponent from "@/components/RegisterComponent.vue";
+import ForgotPasswordPage from "@/components/ForgotPasswordPage.vue";
 
 
 Vue.use(VueRouter)
@@ -51,7 +52,12 @@ const routes = [
     path: '/RegisterComponent',
     name: 'RegisterPage',
     component: RegisterComponent
-  }
+  },
+    {
+        path: '/ForgotPassword',
+        name: 'ForgotPassword',
+        component: ForgotPasswordPage
+    }
 
 
 ]

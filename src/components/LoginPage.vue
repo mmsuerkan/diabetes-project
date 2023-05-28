@@ -1,90 +1,85 @@
-  <template>
-
-    <v-card
-        class="mx-auto"
-        max-width="500"
-        max-height="500"
-
-    >
+<template>
+  <v-container fill-height fluid class="d-flex justify-center align-center">
+    <v-card class="mx-auto" max-width="700">
+      <v-toolbar color="deep-purple accent-4" dark>
+        <v-toolbar-title class="white--text" style="margin:auto">DIABETES APP</v-toolbar-title>
+      </v-toolbar>
       <v-card-text>
-        <div style="display : flex ; text-align: center; justify-items: center">
-
-          <v-toolbar-title>DIABETES APP</v-toolbar-title>
-        </div>
-        <form>
+        <v-form ref="form" v-model="valid" lazy-validation>
           <v-text-field
               v-model="email"
+              :rules="emailRules"
               label="Email"
+              required
           ></v-text-field>
           <v-text-field
               v-model="password"
-              :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
-              :type="show1 ? 'text' : 'password'"
-              name="input-10-1"
+              :rules="passwordRules"
+              :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+              :type="showPassword ? 'text' : 'password'"
               label="Password"
-              @click:append="show1 = !show1"
+              @click:append="showPassword = !showPassword"
           ></v-text-field>
-
-          <v-btn
-              depressed
-              color="primary"
-              @click="enter"
-          >
-            Sign in
-          </v-btn>
-          <!-- araya mesafe bırak-->
-
-          <v-btn
-              depressed
-              color="primary"
-              @click="register"
-          >
-            Register
-          </v-btn>
-
-        </form>
+          <v-row>
+            <v-col cols="12">
+              <v-btn :disabled="!valid" color="primary" class="mr-4" @click="enter">Sign in</v-btn>
+              <v-btn color="primary" @click="register" class="mr-4">Register</v-btn>
+            </v-col>
+            <v-col cols="12">
+              <v-btn text @click="goToForgotPasswordPage">Forgot Password?</v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
       </v-card-text>
     </v-card>
-  </template>
-  <script>
-  import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-  import sweetAlert from "sweetalert";
-  export default {
-    components: {},
-    data: () => ({
-      password: '',
-      email: '',
-      isLogin: false,
-      show1: false
-    }),
+  </v-container>
+</template>
 
-    methods: {
-      async enter(e) {
-        e.preventDefault();
-        const auth = getAuth();
+<script>
+import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
+import sweetAlert from "sweetalert";
 
-        signInWithEmailAndPassword(auth, this.email, this.password)
-            .then((userCredential) => {
-              // Signed in
-              const user = userCredential.user;
-              sweetAlert("Success", user.email + "You are logged in", "success");
-              this.$router.push({name: 'MainPage'});
-              // ...
-            })
-            .catch((error) => {
-
-              const errorMessage = error.message;
-              sweetAlert("Error", errorMessage, "error");
-            });
-
-      },
-      async register(e) {
-        e.preventDefault();
-
-        this.$router.push({name: 'RegisterPage'});
-      },
-
+export default {
+  data: () => ({
+    valid: true,
+    showPassword: false,
+    email: '',
+    password: '',
+    emailRules: [
+      v => !!v || 'E-mail is required',
+      v => /.+@.+/.test(v) || 'E-mail must be valid',
+    ],
+    passwordRules: [
+      v => !!v || 'Password is required',
+    ],
+  }),
+  methods: {
+    goToForgotPasswordPage() {
+      this.$router.push({name: 'ForgotPassword'});
     },
-
-  }
-  </script>
+    validate () {
+      if (this.$refs.form.validate()) {
+        this.enter();
+      }
+    },
+    async enter() {
+      const auth = getAuth();
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password)
+        const user = userCredential.user;
+        if(!user.emailVerified) {
+          sweetAlert("Error", "Please verify your email before logging in.", "error");
+          return;
+        }
+        sweetAlert("Success", `${user.email} You are logged in`, "success");
+        this.$router.push({name: 'MainPage'});
+      } catch (error) {
+        sweetAlert("Error", error.message, "error");
+      }
+    },
+    register() {
+      this.$router.push({name: 'RegisterPage'});
+    },
+  },
+}
+</script>
