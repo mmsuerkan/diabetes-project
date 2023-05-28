@@ -24,6 +24,7 @@
             <v-col cols="12">
               <v-btn :disabled="!valid" color="primary" class="mr-4" @click="enter">Sign in</v-btn>
               <v-btn color="primary" @click="register" class="mr-4">Register</v-btn>
+              <v-btn color="primary" @click="googleSignIn">Sign in with Google</v-btn>
             </v-col>
             <v-col cols="12">
               <v-btn text @click="goToForgotPasswordPage">Forgot Password?</v-btn>
@@ -36,28 +37,29 @@
 </template>
 
 <script>
-import { getAuth, signInWithEmailAndPassword} from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from "firebase/auth";
+import { ref, set, getDatabase } from "firebase/database";
 import sweetAlert from "sweetalert";
 
 export default {
   data: () => ({
     valid: true,
     showPassword: false,
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     emailRules: [
-      v => !!v || 'E-mail is required',
-      v => /.+@.+/.test(v) || 'E-mail must be valid',
+      (v) => !!v || "E-mail is required",
+      (v) => /.+@.+/.test(v) || "E-mail must be valid",
     ],
     passwordRules: [
-      v => !!v || 'Password is required',
+      (v) => !!v || "Password is required",
     ],
   }),
   methods: {
     goToForgotPasswordPage() {
-      this.$router.push({name: 'ForgotPassword'});
+      this.$router.push({ name: "ForgotPassword" });
     },
-    validate () {
+    validate() {
       if (this.$refs.form.validate()) {
         this.enter();
       }
@@ -65,21 +67,56 @@ export default {
     async enter() {
       const auth = getAuth();
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password)
+        const userCredential = await signInWithEmailAndPassword(auth, this.email, this.password);
         const user = userCredential.user;
-        if(!user.emailVerified) {
+        if (!user.emailVerified) {
           sweetAlert("Error", "Please verify your email before logging in.", "error");
           return;
         }
         sweetAlert("Success", `${user.email} You are logged in`, "success");
-        this.$router.push({name: 'MainPage'});
+        this.$router.push({ name: "MainPage" });
       } catch (error) {
         sweetAlert("Error", error.message, "error");
       }
     },
     register() {
-      this.$router.push({name: 'RegisterPage'});
+      this.$router.push({ name: "RegisterPage" });
+    },
+    async googleSignIn() {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+
+      try {
+        const userCredential = await signInWithPopup(auth, provider);
+        const user = userCredential.user;
+        if (!user.emailVerified) {
+          // Kullanıcı henüz doğrulama yapmadığı için hemen hesap oluşturma işlemi gerçekleştirilmez.
+          // Doğrulama yapılması için kullanıcıya e-posta gönderilir.
+          await sendEmailVerification(user);
+          sweetAlert("Success", "Please verify your email address.", "success");
+        } else {
+          await this.createUserInDatabase(user);
+          sweetAlert("Success", `${user.email} You are logged in`, "success");
+        }
+        this.$router.push({ name: "MainPage" });
+      } catch (error) {
+        sweetAlert("Error", error.message, "error");
+      }
+    },
+    async createUserInDatabase(user) {
+      const db = getDatabase();
+      const userRef = ref(db, "users/" + user.uid);
+
+      try {
+        const snapshot = await set(userRef, {
+          email: user.email,
+          // Diğer kullanıcı bilgilerini burada ekleyebilirsiniz
+        });
+        console.log("User created in database:", snapshot);
+      } catch (error) {
+        console.error("Error creating user in database:", error);
+      }
     },
   },
-}
+};
 </script>

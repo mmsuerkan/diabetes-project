@@ -9,10 +9,15 @@
         <input id="file-upload" type="file" @change="onFileChange" style="display:none;">
         <v-btn class="upload-btn" @click="uploadImage">Upload</v-btn>
       </div>
+
       <v-card-title class="title">
         User Information
       </v-card-title>
       <div class="info-cards">
+        <v-card class="info-card">
+          <v-card-subtitle>Name</v-card-subtitle>
+          <v-card-text> <b>{{ userName }}</b></v-card-text>
+        </v-card>
         <v-card class="info-card">
           <v-card-subtitle>Email</v-card-subtitle>
           <v-card-text> <b>{{ userEmail }}</b></v-card-text>
@@ -29,11 +34,11 @@
           <v-card-subtitle>BMI and Diabetes Risk</v-card-subtitle>
           <v-card-text> <b :style="{ color: diabetesRisk.color }">{{ bmi }} kg/m² - {{ diabetesRisk.level }}</b></v-card-text>
         </v-card>
+
       </div>
     </v-card>
   </div>
 </template>
-
 
 <script>
 import {
@@ -78,6 +83,7 @@ export default {
         color: ''
       },
       previewImageUrl: '',
+      userName: '',
     };
   },
   async created() {
@@ -133,6 +139,7 @@ export default {
           this.calculateBMI();
           this.userEmail = data.email;
           this.userGender = data.gender;
+          this.userName = data.name;
           if (data.profileImageUrl) {
             this.profileImageUrl = data.profileImageUrl;
           }
@@ -145,7 +152,7 @@ export default {
     },
     async uploadImage() {
       if (!this.selectedFile) {
-        alert('Please select an image!');
+        swal("Warning!", "Please select an image!", "warning");
         return;
       }
 
@@ -166,6 +173,7 @@ export default {
             console.log("Error uploading image:", error);
             this.isUploading = false;
             this.uploadProgress = 0;
+            swal("Error!", "Failed to upload image.", "error");
           },
           async () => {
             try {
@@ -183,11 +191,12 @@ export default {
                   profileImageUrl: downloadURL,
                   age: this.userAge,
                   weight: this.userWeight,
-                  height: this.userHeight
+                  height: this.userHeight,
+                  name: this.userName,
                 });
-                await swal("Success!", "Your profile picture has been updated!", "success");
+                swal("Success!", "Your profile picture has been updated!", "success");
               } else {
-                await swal("Warning!", "This image has already been uploaded!", "warning");
+                swal("Warning!", "This image has already been uploaded!", "warning");
               }
 
               this.isUploading = false;
@@ -195,6 +204,7 @@ export default {
               this.$forceUpdate();
             } catch (error) {
               console.log("Error getting download URL:", error);
+              swal("Error!", "Failed to get download URL.", "error");
             }
           }
       );
@@ -202,6 +212,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .full-screen {
   margin-bottom: 500px;
