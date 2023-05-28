@@ -103,7 +103,7 @@ export default {
               meals: dietList.meals,
             }));
             this.userDietLists = dietLists;
-            localStorage.setItem('userDietLists', JSON.stringify(dietLists));
+            localStorage.setItem("userDietLists", JSON.stringify(dietLists));
           } else {
             this.userDietLists = [];
           }
@@ -159,14 +159,17 @@ export default {
       const db = getDatabase();
 
       if (user) {
+        if (!this.selectedDate) {
+          swal("Please select a date");
+          return;
+        }
+
         if (this.selectedMeals.length === 0) {
           swal("Please select at least one meal");
           return;
         }
 
-        const selectedDate = this.selectedDate
-            ? this.formatDate(this.selectedDate)
-            : new Date().toLocaleDateString();
+        const selectedDate = this.formatDate(this.selectedDate);
         const dietListRef = ref(db, `users/${user.uid}/diet/`);
         const newDietListRef = push(dietListRef);
         const meals = this.selectedMealsData.map((meal) => ({
@@ -201,8 +204,8 @@ export default {
   },
   computed: {
     selectedMealsData() {
-      return this.selectedMeals.map(mealId => {
-        return this.mealList.find(meal => meal.id === mealId);
+      return this.selectedMeals.map((mealId) => {
+        return this.mealList.find((meal) => meal.id === mealId);
       });
     },
   },
