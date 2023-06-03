@@ -57,7 +57,7 @@
               label="Gender"
               required
           ></v-select>
-          <v-btn :disabled="!valid" color="primary" class="mr-4" @click="validate">Register</v-btn>
+          <v-btn color="primary" class="mr-4" @click="validate">Register</v-btn>
           <v-btn color="primary" @click="$router.push('/')">Back</v-btn>
         </v-form>
       </v-card-text>
