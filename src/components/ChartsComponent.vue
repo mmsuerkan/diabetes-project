@@ -19,36 +19,36 @@
 import Vue from "vue";
 import { ChartPlugin, LineSeries, Category, DataLabel, Tooltip, Legend } from '@syncfusion/ej2-vue-charts';
 import { getAuth } from "firebase/auth";
-import { ref, onValue } from "firebase/database";
-import { getDatabase } from "firebase/database";
+import { ref, onValue, getDatabase } from "firebase/database";
+import { getStorage, ref as ref_storage, uploadBytes, getDownloadURL } from "firebase/storage";
 
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import swal from "sweetalert";
+
 Vue.use(ChartPlugin);
 
 export default {
   data() {
     return {
-      chartPrimaryYAxis : {
+      chartPrimaryYAxis: {
         title: 'Blood Sugar Level'
       },
-      chartTitle : 'Blood Sugar Analysis',
-      chartPrimaryXAxis : {
-        valueType : 'Category',
+      chartTitle: 'Daily Blood Sugar Analysis',
+      chartPrimaryXAxis: {
+        valueType: 'Category',
         title: 'Measurement Time'
       },
-      chartMarker : {
-        dataLabel : {
-          visible : true
+      chartMarker: {
+        dataLabel: {
+          visible: true
         }
       },
-      chartLegendSettings : {
-        visible : true
+      chartLegendSettings: {
+        visible: true
       },
-      chartTooltip : {
-        enable : true
+      chartTooltip: {
+        enable: true
       },
-      salesData : []
+      salesData: []
     };
   },
   methods: {
@@ -79,55 +79,115 @@ export default {
       }
     },
     exportChartToPdf() {
-      const element = document.getElementById('app');
+      const currentDate = new Date();
+      const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+      const dateString = currentDate.toLocaleString('en-US', dateOptions).replace(/[/:\s]/g, '');
 
-      // Kırpma ayarları
+      const storage = getStorage();
+      const originalElement = document.getElementById('chart');
+      let elementClone;
+
+      if (process.env.NODE_ENV === 'production') {
+        elementClone = originalElement.cloneNode(true); // Clone the chart element
+      } else {
+        elementClone = originalElement; // Use original element in development mode
+      }
+
       const cropOptions = {
-        width: element.offsetWidth, // Genişlik
-        height: element.offsetHeight, // Yükseklik
-        x: 0, // Başlangıç noktası x koordinatı
-        y: 110 // Başlangıç noktası y koordinatı
+        width: elementClone.offsetWidth,
+        height: elementClone.offsetHeight,
+        x: 0,
+        y: 0
       };
 
-      html2canvas(element, { ...cropOptions }).then(canvas => {
-        var imgData = canvas.toDataURL('image/png');
-        var imgWidth = 210; // PDF genişliği (in mm)
-        var pageHeight = 295; // PDF yüksekliği (in mm)
-        var imgHeight = canvas.height * imgWidth / canvas.width;
-        var heightLeft = imgHeight;
+      // Show loading icon
+      swal({
+        title: "Upload in progress",
+        text: "PDF is being uploading...",
+        buttons: false,
+        closeOnClickOutside: false,
+        closeOnEsc: false,
+        icon: "info",
+      });
 
-        var doc = new jsPDF('p', 'mm');
-        var position = 0;
+      import('html2canvas').then((html2canvas) => {
+        html2canvas.default(elementClone, { ...cropOptions }).then(canvas => {
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = 210; // PDF width in mm
+          const pageHeight = 295; // PDF height in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
 
-        doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+          import('jspdf').then((jsPDF) => {
+            const doc = new jsPDF.default('p', 'mm');
+            let position = 0;
 
-        while (heightLeft >= 0) {
-          position = heightLeft - imgHeight;
-          doc.addPage();
-          doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
-        }
-        doc.save('BloodSugarAnalysis.pdf');
+            doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+              position = heightLeft - imgHeight;
+              doc.addPage();
+              doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+            }
+
+            const currentUser = getAuth().currentUser;
+            const userId = currentUser.uid;
+            const storageRef = ref_storage(storage, `users/${userId}/BloodSugarAnalysis_${dateString}.pdf`);
+            const pdfBlob = doc.output('blob');
+
+            uploadBytes(storageRef, pdfBlob)
+                .then((snapshot) => {
+                  console.log('PDF uploaded to Firebase Storage');
+              doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
+                  getDownloadURL(snapshot.ref)
+                      .then((downloadURL) => {
+                        console.log('Download URL:', downloadURL);
+
+                        // Hide the loading icon
+                        swal.close();
+                        swal("Success!", "PDF saved successfully.", "success");
+
+                        // Remove the cloned chart element
+                        if (process.env.NODE_ENV === 'production') {
+                          elementClone.remove();
+                        }
+                      })
+                      .catch((error) => {
+                        console.error('Error getting download URL:', error);
+                        // Handle error
+                      });
+                })
+                .catch((error) => {
+                  console.error('Error uploading PDF to Firebase Storage:', error);
+                  // Hide the loading icon
+                  swal.close();
+
+                  // Show error message
+                  swal("Error!", "Failed to upload PDF.", "error");
+                });
+          });
+        });
       });
     }
   },
   mounted() {
     this.fetchUserData();
   },
-  provide : {
+  provide: {
     chart: [LineSeries, Category, DataLabel, Legend, Tooltip]
   }
-}
+};
 </script>
 
 <style>
 .export-button {
   position: absolute;
-  top: 0px;
+  top: 10px;
   right: 10px;
-  padding-bottom: 20px;
-  z-index: 9999; /* Yüksek bir değer atayarak diğer öğelerin üzerine çıkmasını sağlar */
+  padding: 5px;
+  z-index: 9999;
   background-color: #ff5f5f;
   color: white;
   border: none;
