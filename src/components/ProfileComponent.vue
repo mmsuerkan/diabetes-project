@@ -34,7 +34,12 @@
           <v-card-subtitle>BMI and Diabetes Risk</v-card-subtitle>
           <v-card-text> <b :style="{ color: diabetesRisk.color }">{{ bmi }} kg/m² - {{ diabetesRisk.level }}</b></v-card-text>
         </v-card>
-
+        <v-card class="info-card">
+          <v-card-subtitle>Uploaded Pdfs</v-card-subtitle>
+          <v-card-text>
+            <ShowPdf />
+          </v-card-text>
+        </v-card>
       </div>
     </v-card>
   </div>
@@ -59,10 +64,11 @@ import {
 } from "firebase/database";
 import { getAuth } from "firebase/auth";
 import swal from "sweetalert";
-
+import ShowPdf from './ShowPdf.vue';
 export default {
   components: {
-    SvgIcon
+    SvgIcon,
+    ShowPdf,
   },
   name: "ProfileComponent",
   data() {
