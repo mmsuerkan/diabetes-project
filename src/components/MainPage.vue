@@ -7,7 +7,7 @@
     >
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
-      <v-toolbar-title>DIABETES APP</v-toolbar-title>
+      <v-toolbar-title>Blood Sugar Tracking App</v-toolbar-title>
 
       <v-spacer></v-spacer>
 
@@ -67,6 +67,7 @@ import GuideComponent from '@/components/GuideComponent.vue';
 import ProfileComponent from "@/components/ProfileComponent.vue";
 import UpdateDailyDiet from "@/components/UpdateDailyDiet.vue";
 import { getAuth } from "firebase/auth";
+import FeedbackComponent from "@/components/FeedbackComponent.vue";
 
 export default {
   data() {
@@ -78,6 +79,7 @@ export default {
         { name: 'Guide', route: '/GuideComponent', component: GuideComponent },
         { name: 'Daily Diet List', route: '/UpdateDailyDiet', component: UpdateDailyDiet },
         { name: 'Profile', route: '/ProfileComponent', component: ProfileComponent },
+        { name: 'Feedback', route: '/FeedbackComponent', component: FeedbackComponent },
       ],
     };
   },

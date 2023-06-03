@@ -1,33 +1,39 @@
 <template>
   <div>
-    <h1>Rehber</h1>
-    <v-card>
-      <v-card-title>
-        Kan Şekeri Takip Uygulaması Kullanım Rehberi
-      </v-card-title>
-      <v-card-subtitle>
-        Uygulamayı nasıl kullanacağınızı öğrenin
-      </v-card-subtitle>
-      <v-card-text>
+    <v-card class="mx-auto" max-width="800">
+      <v-img
+          class="white--text align-end"
+          height="200px"
+          src="https://cdn.vuetifyjs.com/images/cards/docks.jpg"
+      >
+        <v-card-title>Blood Sugar Tracking App User Guide</v-card-title>
+      </v-img>
+
+      <v-card-subtitle class="pl-4 pt-4">Learn how to use the application</v-card-subtitle>
+
+      <v-card-text class="text--primary pl-6 text-body-1 guide-text">
         <ol>
-          <li>Öncelikle uygulamaya kayıt olun veya mevcut hesabınızla giriş yapın.</li>
-          <li>Ana sayfada, kan şekerinizin güncel seviyesini ve ölçüm saatinizi girebileceğiniz bir form bulunur.</li>
-          <li>Kan şekerinizi ve ölçüm saatini girin ve "Gönder" butonuna tıklayın.</li>
-          <li>Verileriniz başarıyla kaydedildiğinde, bir onay mesajı görünecektir.</li>
-          <li>Verilerinizi tablo şeklinde görmek için "Sağlık Verileri" sayfasına gidin. Bu tablo, verilerinizi ölçüm saatine göre sıralar.</li>
-          <li>Hesap ayarlarınızı değiştirmek veya çıkış yapmak için "Guide" sayfasını ziyaret edin.</li>
+          <li>First, register for the app or log in with your existing account.</li>
+          <li>On the main page, you'll find a form where you can enter your current blood sugar level and measurement time.</li>
+          <li>Enter your blood sugar and measurement time and click on the "Submit" button.</li>
+          <li>When your data is successfully saved, you will see a confirmation message.</li>
+          <li>To view your data in a table format, go to the "Health Data" page. This table lists your data in order of measurement time.</li>
+          <li>Visit the "Guide" page to change your account settings or to log out.</li>
         </ol>
       </v-card-text>
-
     </v-card>
   </div>
 </template>
 
+
 <script>
 export default {
   name: "GuideComponent",
-  methods: {
-
-  }
 };
 </script>
+
+<style scoped>
+.v-card {
+  margin: 20px;
+}
+</style>

@@ -17,6 +17,7 @@
 import { getStorage, ref as ref_storage, listAll, getDownloadURL } from "firebase/storage";
 import { getAuth } from "firebase/auth";
 import axios from "axios";
+import swal from "sweetalert";
 
 export default {
   name: "ShowPdf",
@@ -67,7 +68,7 @@ export default {
           disposition: "attachment"
         }]
       };
-
+      await swal("Email Sent!", "The PDF has been sent to your email.", "success");
       try {
         const response = await axios({
           method: "post",
@@ -78,7 +79,7 @@ export default {
           },
           data: emailData
         });
-
+        await swal("Email Sent!", "The PDF has been sent to your email.", "success");
         console.log(response.data); // Yanıtı istediğiniz gibi işleyebilirsiniz.
       } catch (error) {
         console.error(error);
