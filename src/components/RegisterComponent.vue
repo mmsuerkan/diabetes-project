@@ -67,7 +67,7 @@
 
 <script>
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { ref, set,getDatabase } from "firebase/database";
+import { ref, set, getDatabase } from "firebase/database";
 import sweetAlert from "sweetalert";
 
 export default {
@@ -75,60 +75,64 @@ export default {
     valid: true,
     showPassword: false,
     showPasswordConfirm: false,
-    email: '',
-    password: '',
-    passwordConfirm: '',
-    name: '',
-    gender: '',
-    genderOptions: ['Male', 'Female', 'Other'],
-    age: '',
-    weight: '',
-    height: '',
+    email: "",
+    password: "",
+    passwordConfirm: "",
+    name: "",
+    gender: "",
+    genderOptions: ["Male", "Female", "Other"],
+    age: "",
+    weight: "",
+    height: "",
     emailRules: [
-      v => !!v || 'E-mail is required',
-      v => /.+@.+/.test(v) || 'E-mail must be valid',
+      (v) => !!v || "E-mail is required",
+      (v) => /.+@.+/.test(v) || "E-mail must be valid",
     ],
     passwordRules: [
-      v => !!v || 'Password is required',
+      (v) => !!v || "Password is required",
     ],
     passwordConfirmRules: [
-      v => !!v || 'Password confirmation is required',
-      v => v === this.password || 'Password must match',
+      (v) => !!v || "Password confirmation is required",
+      (v) => v === this.password || "Password must match",
     ],
+    registering: false,
   }),
   methods: {
-    validate () {
+    validate() {
       this.passwordConfirmRules = [
-        v => !!v || 'Password confirmation is required',
-        v => v === this.password || 'Password must match',
+        (v) => !!v || "Password confirmation is required",
+        (v) => v === this.password || "Password must match",
       ];
       if (this.$refs.form.validate()) {
-        this.register();
+        if (!this.registering) {
+          this.registering = true;
+          this.register();
+        }
       }
     },
     async register() {
       const auth = getAuth();
       const db = getDatabase();
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password)
+        const userCredential = await createUserWithEmailAndPassword(auth, this.email, this.password);
         const user = userCredential.user;
-        // Write user data to realtime database
-        await set(ref(db, 'users/' + user.uid), {
+        await set(ref(db, "users/" + user.uid), {
           email: user.email,
-          gender:this.gender,
+          gender: this.gender,
           name: this.name,
           age: this.age,
           weight: this.weight,
           height: this.height,
-          // any other user info you want to save...
         });
-        await sendEmailVerification(user)
-        sweetAlert("Success!", "You have successfully registered! Please verify your email address.", "success")
-        this.$router.push('/');
+        await sendEmailVerification(user);
+        await sweetAlert("Success!", "You have successfully registered! Please verify your email address.", "success");
+        this.$router.push("/");
       } catch (error) {
-        sweetAlert("Error!", error.message, "error")
+        await sweetAlert("Error!", error.message, "error");
+      } finally {
+        this.registering = false;
       }
-    }
+    },
   },
 };
 </script>

@@ -38,7 +38,7 @@
             ></v-date-picker>
           </v-menu>
         </v-col>
-        <v-col >
+        <v-col>
           <v-menu
               ref="menu"
               v-model="menu"
@@ -70,14 +70,14 @@
     </v-form>
 
     <v-btn color="primary" @click="submitForm">Submit</v-btn>
-    <BloodSugarTable />
+    <BloodSugarTable/>
   </v-container>
 </template>
 
 <script>
-import { getAuth } from "firebase/auth";
-import { ref, set, push } from "firebase/database";
-import { getDatabase } from "firebase/database";
+import {getAuth} from "firebase/auth";
+import {ref, set, push} from "firebase/database";
+import {getDatabase} from "firebase/database";
 import sweetAlert from "sweetalert";
 import BloodSugarTable from '@/components/BloodSugarTable.vue';
 
@@ -90,7 +90,7 @@ export default {
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
-    const currentDay = now.toISOString().substr(0,10); // yyyy-mm-dd formatında tarih alırız.
+    const currentDay = now.toISOString().substr(0, 10); // yyyy-mm-dd formatında tarih alırız.
 
     return {
       menu: false,
@@ -138,7 +138,10 @@ export default {
             dateTime: dateTimeString // Tarih/saat bilgisini burada ekliyoruz
           })
               .then(() => {
-                sweetAlert("Başarılı!", "Kan şekeri seviyesi başarıyla kaydedildi.", "success");
+                if (bloodSugarLevel > 200) {
+                  sweetAlert("Uyarı!", "Kan şekeri seviyesi çok yüksek!", "warning");
+                }
+
                 console.log("Health data saved successfully");
               })
               .catch((error) => {
