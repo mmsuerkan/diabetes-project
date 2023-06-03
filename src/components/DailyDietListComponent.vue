@@ -45,6 +45,7 @@
 </template>
 
 <script>
+
 export default {
   name: "DailyDietListComponent",
   props: {
@@ -59,7 +60,12 @@ export default {
   },
   methods: {
     getMealImage(mealId) {
-      return require(`@/assets/meal-images/${mealId}.jpg`);
+      try {
+        return require(`@/assets/meal-images/${mealId}.jpg`);
+      } catch (error) {
+        // Image file doesn't exist, return a default image path
+        return require("@/assets/meal-images/default.jpg");
+      }
     },
     formatDate(date) {
       const parts = date.split("-");

@@ -30,6 +30,7 @@
             dense
         ></v-date-picker>
         <v-btn color="primary" @click="saveDailyDiet">Save</v-btn>
+        <v-btn color="primary" @click="openAddMealDialog">Add New Meal</v-btn>
       </v-card-actions>
     </v-card>
 
@@ -66,6 +67,20 @@
         <p>No diet lists available.</p>
       </div>
     </v-container>
+
+    <v-dialog v-model="addMealDialog" max-width="500px">
+      <v-card>
+        <v-card-title>Add New Meal</v-card-title>
+        <v-card-text>
+          <v-text-field v-model="newMealName" label="Meal Name"></v-text-field>
+          <v-text-field v-model="newMealCalories" label="Calories"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="primary" @click="addMeal">Add</v-btn>
+          <v-btn color="secondary" @click="closeAddMealDialog">Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -84,6 +99,9 @@ export default {
       selectedMeals: [],
       userDietLists: [],
       selectedDate: null,
+      addMealDialog: false,
+      newMealName: "",
+      newMealCalories: "",
     };
   },
   methods: {
@@ -201,6 +219,40 @@ export default {
     getTotalCalories(meals) {
       return meals.reduce((total, meal) => total + meal.calories, 0);
     },
+    openAddMealDialog() {
+      this.addMealDialog = true;
+    },
+    closeAddMealDialog() {
+      this.addMealDialog = false;
+      this.newMealName = "";
+      this.newMealCalories = "";
+    },
+    addMeal() {
+      if (!this.newMealName || !this.newMealCalories) {
+        swal("Please enter meal name and calories");
+        return;
+      }
+
+      const db = getDatabase();
+      const mealsRef = ref(db, "meals");
+      const newMealRef = push(mealsRef);
+      const newMeal = {
+        name: this.newMealName,
+        calories: parseInt(this.newMealCalories),
+        details: "",
+      };
+      set(newMealRef, newMeal)
+          .then(() => {
+            console.log("Meal added successfully");
+            this.closeAddMealDialog();
+            swal("Meal added successfully", {
+              icon: "success",
+            });
+          })
+          .catch((error) => {
+            console.error("Error adding meal:", error);
+          });
+    }
   },
   computed: {
     selectedMealsData() {
