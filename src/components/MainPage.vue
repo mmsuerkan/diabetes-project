@@ -1,10 +1,6 @@
 <template>
   <v-card>
-    <v-toolbar
-        color="primary"
-        dark
-        flat
-    >
+    <v-toolbar color="deep-purple accent-4" dark flat>
       <v-app-bar-nav-icon></v-app-bar-nav-icon>
 
       <v-toolbar-title>Blood Sugar Tracking App</v-toolbar-title>
@@ -21,26 +17,17 @@
 
       <!-- Logout button -->
       <v-btn @click="logout">
-        <v-icon
-            dark
-            right
-        >
+        <v-icon dark right>
           mdi-checkbox-marked-circle
         </v-icon>
         Logout
       </v-btn>
 
       <template v-slot:extension>
-        <v-tabs
-            v-model="tab"
-            align-with-title
-        >
+        <v-tabs v-model="tab" align-with-title>
           <v-tabs-slider color="yellow"></v-tabs-slider>
 
-          <v-tab
-              v-for="item in items"
-              :key="item"
-          >
+          <v-tab v-for="item in items" :key="item.route">
             {{ item.name }}
           </v-tab>
         </v-tabs>
@@ -48,10 +35,7 @@
     </v-toolbar>
 
     <v-tabs-items v-model="tab">
-      <v-tab-item
-          v-for="item in items"
-          :key="item.route"
-      >
+      <v-tab-item v-for="item in items" :key="item.route">
         <v-card flat>
           <component :is="item.component"></component>
         </v-card>
