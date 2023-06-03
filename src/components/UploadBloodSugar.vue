@@ -10,6 +10,34 @@
               required
           ></v-text-field>
         </v-col>
+        <v-col>
+          <v-menu
+              ref="menuDate"
+              v-model="menuDate"
+              :close-on-content-click="false"
+              :return-value.sync="form.measurementDate"
+              transition="scale-transition"
+              offset-y
+              min-width="290px"
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                  v-model="form.measurementDate"
+                  label="Ölçüm Tarihi"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+                v-if="menuDate"
+                v-model="form.measurementDate"
+                full-width
+                @input="$refs.menuDate.save(form.measurementDate)"
+            ></v-date-picker>
+          </v-menu>
+        </v-col>
         <v-col >
           <v-menu
               ref="menu"
@@ -46,7 +74,6 @@
   </v-container>
 </template>
 
-
 <script>
 import { getAuth } from "firebase/auth";
 import { ref, set, push } from "firebase/database";
@@ -59,11 +86,19 @@ export default {
     BloodSugarTable
   },
   data() {
+    // Şimdiki tarih ve saat bilgisini elde ederiz.
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const currentDay = now.toISOString().substr(0,10); // yyyy-mm-dd formatında tarih alırız.
+
     return {
       menu: false,
+      menuDate: false,
       form: {
         bloodSugarLevel: null,
-        measurementTime: null,
+        measurementTime: `${currentHour}:${currentMinute}`,
+        measurementDate: currentDay,
       },
     };
   },
@@ -77,11 +112,14 @@ export default {
         if (user) {
           // Kan şekeri değerini kontrol et
           const bloodSugarLevel = parseInt(this.form.bloodSugarLevel);
-          if (isNaN(bloodSugarLevel) || bloodSugarLevel < 70 || bloodSugarLevel > 140) {
-            sweetAlert("Hata!", "Kan şekeri seviyesi geçerli değil. 70-140 arası değeri olmalıdır", "error");
+          if (isNaN(bloodSugarLevel) || bloodSugarLevel < 50 || bloodSugarLevel > 250) {
+            sweetAlert("Hata!", "Kan şekeri seviyesi geçerli değil. 50-250 arası değeri olmalıdır", "error");
             return;
           }
-
+          if (!this.form.measurementDate) {
+            sweetAlert("Hata!", "Ölçüm tarihi boş olamaz.", "error");
+            return;
+          }
           // Ölçüm saati değerini kontrol et
           if (!this.form.measurementTime) {
             sweetAlert("Hata!", "Ölçüm saati boş olamaz.", "error");
@@ -96,6 +134,7 @@ export default {
           set(newHealthDataRef, {
             bloodSugarLevel: this.form.bloodSugarLevel,
             measurementTime: this.form.measurementTime,
+            measurementDate: this.form.measurementDate,
             dateTime: dateTimeString // Tarih/saat bilgisini burada ekliyoruz
           })
               .then(() => {

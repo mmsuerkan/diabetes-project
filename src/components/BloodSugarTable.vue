@@ -1,8 +1,10 @@
-<!-- BloodSugarTable.vue -->
 <template>
   <v-data-table :headers="headers" :items="healthData">
     <template v-slot:item.measurementTime="{ item }">
       {{ item.measurementTime }}
+    </template>
+    <template v-slot:item.measurementDate="{ item }">
+      {{ item.measurementDate }}
     </template>
   </v-data-table>
 </template>
@@ -18,6 +20,7 @@ export default {
     headers: [
       { text: 'Ölçüm Saati(Sırala)', value: 'measurementTime' },
       { text: 'Kan Şekeri Seviyesi(Sırala)', value: 'bloodSugarLevel' },
+      { text: 'Ölçüm Tarihi(Sırala)', value: 'measurementDate' }, // Ölçüm Tarihi kolonunu ekledik
     ],
   }),
   created() {
