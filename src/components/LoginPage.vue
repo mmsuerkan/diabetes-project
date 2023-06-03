@@ -76,12 +76,6 @@ export default {
     githubIconPath: mdiGithub,
     twitterIconPath: mdiTwitter
   }),
-  created() {
-    const auth = getAuth();
-    if (auth.currentUser) {
-      this.$router.push({ name: "MainPage" });
-    }
-  },
   methods: {
     goToForgotPasswordPage() {
       this.$router.push({ name: "ForgotPassword" });
