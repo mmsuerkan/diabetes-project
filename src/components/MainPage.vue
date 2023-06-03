@@ -82,10 +82,7 @@ export default {
     };
   },
   created() {
-    const auth = getAuth();
-    if (!auth.currentUser) {
-      this.$router.push({ name: "LoginPage" });
-    }
+
   },
   methods: {
     logout() {
