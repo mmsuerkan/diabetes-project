@@ -1,10 +1,13 @@
 <template>
   <v-data-table :headers="headers" :items="healthData">
     <template v-slot:item.measurementTime="{ item }">
-      {{ item.measurementTime }}
+      {{ formatTime(item.measurementTime) }}
     </template>
     <template v-slot:item.measurementDate="{ item }">
       {{ item.measurementDate }}
+    </template>
+    <template v-slot:item.bloodSugarLevel="{ item }">
+      <span :class="{ 'red-text': item.bloodSugarLevel > 200 }">{{ item.bloodSugarLevel }}</span>
     </template>
   </v-data-table>
 </template>
@@ -20,7 +23,7 @@ export default {
     headers: [
       { text: 'Ölçüm Saati(Sırala)', value: 'measurementTime' },
       { text: 'Kan Şekeri Seviyesi(Sırala)', value: 'bloodSugarLevel' },
-      { text: 'Ölçüm Tarihi(Sırala)', value: 'measurementDate' }, // Ölçüm Tarihi kolonunu ekledik
+      { text: 'Ölçüm Tarihi(Sırala)', value: 'measurementDate' },
     ],
   }),
   created() {
@@ -50,6 +53,16 @@ export default {
         });
       }
     },
+    formatTime(time) {
+      const [hour, minute] = time.split(":");
+      return `${parseInt(hour)}:${minute.padStart(2, "0")}`;
+    },
   },
 };
 </script>
+
+<style scoped>
+.red-text {
+  color: red;
+}
+</style>
