@@ -176,15 +176,6 @@
           y: 0
         };
 
-        // Show loading icon
-        swal({
-          title: "Upload in progress",
-          text: "PDF is being uploading...",
-          buttons: false,
-          closeOnClickOutside: false,
-          closeOnEsc: false,
-          icon: "info",
-        });
 
         import('html2canvas').then((html2canvas) => {
           html2canvas.default(elementClone, { ...cropOptions }).then(canvas => {
