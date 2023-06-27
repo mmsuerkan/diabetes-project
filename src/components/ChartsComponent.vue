@@ -212,11 +212,11 @@
               const userId = currentUser.uid;
               const storageRef = ref_storage(storage, `users/${userId}/BloodSugarAnalysis_${dateString}.pdf`);
               const pdfBlob = doc.output('blob');
-
+              doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
               uploadBytes(storageRef, pdfBlob)
                   .then((snapshot) => {
                     console.log('PDF uploaded to Firebase Storage');
-                doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
+
                     getDownloadURL(snapshot.ref)
                         .then((downloadURL) => {
                           console.log('Download URL:', downloadURL);
